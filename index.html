@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念座舱 Prompt Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & TOKENS ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Layout */
+  --nav-h: 60px;
+  --sidebar-w: 248px;
+
+  /* Colors – light base */
+  --bg:        #F2F2F7;
+  --bg-card:   #FFFFFF;
+  --bg-sidebar:#FAFAFC;
+  --bg-input:  rgba(120,120,128,0.12);
+  --bg-tag:    rgba(120,120,128,0.1);
+
+  /* Text */
+  --t1: #1C1C1E;
+  --t2: #48484A;
+  --t3: #8E8E93;
+  --t4: #AEAEB2;
+
+  /* Borders */
+  --sep:   rgba(60,60,67,0.1);
+  --sep2:  rgba(60,60,67,0.18);
+
+  /* Brand blue */
+  --blue:       #0A84FF;
+  --blue-dim:   rgba(10,132,255,0.12);
+  --blue-mid:   rgba(10,132,255,0.22);
+
+  /* Accents */
+  --green:  #30D158;
+  --orange: #FF9F0A;
+  --red:    #FF453A;
+  --purple: #BF5AF2;
+
+  /* Radius */
+  --r-xs:  6px;
+  --r-sm:  10px;
+  --r-md:  14px;
+  --r-lg:  18px;
+  --r-xl:  22px;
+  --r-pill:999px;
+
+  /* Shadow */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,0.1),  0 2px 8px  rgba(0,0,0,0.06);
+
+  /* Typography */
+  --font: -apple-system, "SF Pro Text", "Noto Sans SC", sans-serif;
+  --font-display: -apple-system, "SF Pro Display", "Noto Sans SC", sans-serif;
+}
+
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--t1);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════
+   NAV
+═══════════════════════════════════════ */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 400;
+  height: var(--nav-h);
+  background: rgba(242,242,247,0.85);
+  backdrop-filter: saturate(200%) blur(24px);
+  -webkit-backdrop-filter: saturate(200%) blur(24px);
+  border-bottom: 1px solid var(--sep);
+  display: flex; align-items: center;
+  padding: 0 1.5rem; gap: 1rem;
+}
+
+.nav-brand {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-display);
+  font-size: 1rem; font-weight: 700;
+  letter-spacing: -0.025em; color: var(--t1);
+  white-space: nowrap; flex-shrink: 0;
+  text-decoration: none;
+}
+.nav-brand-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.nav-brand-icon svg { width: 15px; height: 15px; color: white; }
+
+.nav-divider {
+  width: 1px; height: 18px;
+  background: var(--sep2); flex-shrink: 0;
+}
+
+/* SEARCH — much more visible */
+.nav-search {
+  flex: 1; max-width: 400px; position: relative;
+}
+.nav-search-icon {
+  position: absolute; left: 11px; top: 50%;
+  transform: translateY(-50%);
+  width: 15px; height: 15px; color: var(--t3);
+  pointer-events: none;
+}
+.nav-search input {
+  width: 100%;
+  padding: 9px 14px 9px 34px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--sep2);
+  border-radius: var(--r-sm);
+  font-family: var(--font); font-size: 0.875rem;
+  color: var(--t1); outline: none;
+  box-shadow: var(--shadow-sm);
+  transition: border-color .18s, box-shadow .18s;
+}
+.nav-search input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-dim), var(--shadow-sm);
+}
+.nav-search input::placeholder { color: var(--t4); }
+
+.nav-right {
+  margin-left: auto; display: flex; align-items: center; gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.nav-pill {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border-radius: var(--r-pill);
+  border: 1.5px solid var(--sep2);
+  background: var(--bg-card);
+  font-family: var(--font); font-size: 0.8rem; font-weight: 500;
+  color: var(--t2); cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all .18s; white-space: nowrap;
+}
+.nav-pill:hover {
+  border-color: var(--blue); color: var(--blue);
+  background: var(--blue-dim);
+}
+.nav-pill.active {
+  background: var(--blue); color: white;
+  border-color: var(--blue);
+  box-shadow: 0 2px 8px rgba(10,132,255,0.35);
+}
+.nav-pill svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+.nav-stat {
+  font-size: 0.78rem; color: var(--t3); white-space: nowrap;
+  display: flex; align-items: center; gap: 4px;
+}
+.nav-stat b { color: var(--blue); font-weight: 700; font-size: 0.9rem; }
+
+/* ═══════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════ */
+.layout {
+  display: flex;
+  padding-top: var(--nav-h);
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-w); flex-shrink: 0;
+  position: sticky; top: var(--nav-h);
+  height: calc(100vh - var(--nav-h));
+  overflow-y: auto;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--sep);
+  padding: 1.25rem 0.75rem 2rem;
+}
+.sidebar::-webkit-scrollbar { display: none; }
+
+.sb-group-label {
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--t4); padding: 0 0.75rem;
+  margin: 1.25rem 0 0.4rem;
+}
+.sb-group-label:first-child { margin-top: 0; }
+
+.sb-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 12px; border-radius: var(--r-md);
+  cursor: pointer; transition: background .14s, color .14s;
+  font-size: 0.875rem; color: var(--t2);
+  position: relative; margin-bottom: 2px;
+}
+.sb-item:hover {
+  background: rgba(0,0,0,0.05); color: var(--t1);
+}
+.sb-item.active {
+  background: var(--blue-dim); color: var(--blue);
+  font-weight: 600;
+}
+/* active left indicator */
+.sb-item.active::before {
+  content: '';
+  position: absolute; left: 0; top: 20%; bottom: 20%;
+  width: 3px; border-radius: 0 3px 3px 0;
+  background: var(--blue);
+}
+.sb-icon { font-size: 1rem; flex-shrink: 0; line-height: 1; }
+.sb-count {
+  margin-left: auto; flex-shrink: 0;
+  font-size: 0.7rem; font-weight: 600;
+  color: var(--t4); background: var(--bg);
+  padding: 2px 8px; border-radius: var(--r-pill);
+}
+.sb-item.active .sb-count {
+  background: var(--blue-mid); color: var(--blue);
+}
+
+/* ═══════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════ */
+.main {
+  flex: 1; min-width: 0;
+  padding: 3rem 2.5rem 8rem;
+  max-width: 1100px;
+}
+
+/* ── HERO ── */
+.hero { margin-bottom: 3rem; }
+.hero-eyebrow {
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--blue); margin-bottom: 0.75rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.hero-eyebrow::after {
+  content: ''; flex: 1; max-width: 60px;
+  height: 1.5px; background: var(--blue); opacity: 0.3;
+  border-radius: 1px;
+}
+.hero-h {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  font-weight: 700; letter-spacing: -0.04em;
+  line-height: 1.08; color: var(--t1);
+  margin-bottom: 1rem;
+}
+.hero-h em { color: var(--blue); font-style: normal; }
+.hero-p {
+  font-size: 1rem; color: var(--t2);
+  line-height: 1.7; max-width: 500px;
+}
+
+/* ── CREATE CHIPS ── */
+.create-strip {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 2.5rem; margin-top: 1.5rem;
+}
+.c-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: var(--r-pill);
+  background: var(--bg-card);
+  border: 1.5px solid var(--sep);
+  box-shadow: var(--shadow-sm);
+  font-size: 0.78rem; transition: all .15s;
+}
+.c-chip:hover { border-color: var(--blue); }
+.c-chip-letter {
+  font-weight: 800; color: var(--blue);
+  font-size: 0.82rem; letter-spacing: -0.01em;
+}
+.c-chip-name { color: var(--t2); }
+
+/* ── BUILDER ── */
+.builder {
+  background: var(--bg-card);
+  border: 1.5px solid var(--sep);
+  border-radius: var(--r-xl);
+  padding: 1.75rem 2rem;
+  margin-bottom: 3rem;
+  box-shadow: var(--shadow-md);
+  position: relative; overflow: hidden;
+}
+/* subtle top accent stripe */
+.builder::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--blue), var(--purple));
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+}
+.builder-header { margin-bottom: 1.25rem; }
+.builder-title {
+  font-size: 1rem; font-weight: 700;
+  color: var(--t1); letter-spacing: -0.02em;
+  display: flex; align-items: center; gap: 7px;
+  margin-bottom: 0.3rem;
+}
+.builder-title-icon {
+  width: 22px; height: 22px; border-radius: 6px;
+  background: var(--blue-dim);
+  display: flex; align-items: center; justify-content: center;
+}
+.builder-title-icon svg { width: 12px; height: 12px; color: var(--blue); }
+.builder-sub { font-size: 0.82rem; color: var(--t3); line-height: 1.5; }
+
+.builder-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem; margin-bottom: 1.25rem;
+}
+.bfield label {
+  display: block; font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--t3); margin-bottom: 5px;
+}
+.bsel {
+  width: 100%; padding: 9px 30px 9px 11px;
+  background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238E8E93' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 9px center;
+  border: 1.5px solid var(--sep2);
+  border-radius: var(--r-sm);
+  color: var(--t1); font-family: var(--font); font-size: 0.83rem;
+  outline: none; cursor: pointer; appearance: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.bsel:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-dim);
+}
+.bsel option { background: white; }
+
+.bout-label {
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: var(--t3); margin-bottom: 6px;
+}
+.bout {
+  background: var(--bg); border: 1.5px solid var(--sep);
+  border-radius: var(--r-md); padding: 1rem 1.1rem;
+  font-size: 0.86rem; color: var(--t3); line-height: 1.75;
+  min-height: 58px; white-space: pre-wrap; word-break: break-all;
+  margin-bottom: 1rem; transition: border-color .15s;
+}
+.bout.filled {
+  color: var(--blue); border-color: var(--blue-mid);
+  background: var(--blue-dim);
+}
+.bactions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+/* ── BUTTONS ── */
+.btn-blue {
+  padding: 9px 22px; background: var(--blue); border: none;
+  border-radius: var(--r-pill); color: white;
+  font-family: var(--font); font-size: 0.84rem; font-weight: 600;
+  cursor: pointer; letter-spacing: -0.01em;
+  box-shadow: 0 2px 8px rgba(10,132,255,0.35);
+  transition: opacity .15s, transform .1s;
+}
+.btn-blue:hover { opacity: 0.88; }
+.btn-blue:active { transform: scale(0.97); }
+.btn-ghost {
+  padding: 9px 22px; background: var(--bg-card);
+  border: 1.5px solid var(--sep2); border-radius: var(--r-pill);
+  color: var(--t2); font-family: var(--font);
+  font-size: 0.84rem; font-weight: 500; cursor: pointer;
+  transition: all .15s;
+}
+.btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
+
+/* ═══════════════════════════════════════
+   SECTION
+═══════════════════════════════════════ */
+.section { margin-bottom: 3.5rem; }
+.section-hd {
+  display: flex; align-items: center;
+  margin-bottom: 1.1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 2px solid var(--sep);
+  gap: 0.75rem;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem; font-weight: 700;
+  letter-spacing: -0.03em; color: var(--t1);
+}
+.section-desc {
+  font-size: 0.8rem; color: var(--t3);
+  display: none; /* hide on small, show on wider */
+}
+.section-badge {
+  margin-left: auto; flex-shrink: 0;
+  font-size: 0.72rem; font-weight: 600; color: var(--blue);
+  background: var(--blue-dim); padding: 3px 10px;
+  border-radius: var(--r-pill);
+}
+
+/* ═══════════════════════════════════════
+   PROMPT GRID
+═══════════════════════════════════════ */
+.pgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--sep);
+  border-radius: var(--r-lg);
+  padding: 1.25rem 1.35rem;
+  display: flex; flex-direction: column; gap: 0.75rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .2s, border-color .2s, transform .2s;
+  animation: slideUp .35s ease both;
+  cursor: default;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--sep2);
+  transform: translateY(-2px);
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* card top row */
+.card-top {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 0.5rem;
+}
+.card-titles {}
+.card-title {
+  font-size: 0.96rem; font-weight: 700;
+  letter-spacing: -0.02em; color: var(--t1);
+  line-height: 1.25; margin-bottom: 3px;
+}
+.card-en {
+  font-size: 0.72rem; color: var(--t4);
+  letter-spacing: 0.01em; font-weight: 400;
+}
+
+/* fav button — bigger hit target */
+.fav-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: none; background: none; flex-shrink: 0;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--t4); transition: all .15s;
+  margin-top: -2px;
+}
+.fav-btn:hover {
+  background: rgba(255,159,10,0.1); color: var(--orange);
+}
+.fav-btn.on { color: var(--orange); }
+.fav-btn.on svg { fill: currentColor; }
+.fav-btn svg { width: 16px; height: 16px; transition: fill .15s; }
+
+/* tags */
+.card-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.tag {
+  font-size: 0.65rem; font-weight: 600;
+  padding: 3px 9px; border-radius: var(--r-xs);
+  background: var(--bg-tag); color: var(--t2);
+  letter-spacing: 0.02em;
+}
+
+/* mode toggle — clear pill switcher */
+.mode-toggle {
+  display: inline-flex; align-items: center;
+  background: var(--bg); border: 1.5px solid var(--sep);
+  border-radius: var(--r-sm); padding: 3px; gap: 2px;
+}
+.mt-btn {
+  padding: 5px 13px; border-radius: 7px;
+  border: none; background: none;
+  font-family: var(--font); font-size: 0.73rem; font-weight: 600;
+  color: var(--t3); cursor: pointer; transition: all .15s;
+  white-space: nowrap;
+}
+.mt-btn.active {
+  background: var(--bg-card); color: var(--blue);
+  box-shadow: var(--shadow-sm);
+}
+
+/* raw prompt text */
+.prompt-raw {
+  font-size: 0.8rem; color: var(--t2); line-height: 1.7;
+  background: var(--bg); border-radius: var(--r-sm);
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--sep);
+  display: -webkit-box; -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden;
+  transition: all .2s;
+  cursor: text; user-select: text;
+}
+.card:hover .prompt-raw {
+  -webkit-line-clamp: unset; overflow: visible;
+}
+
+/* CREATE view */
+.prompt-create { display: none; }
+.prompt-create.show { display: block; }
+.cr-rows { display: flex; flex-direction: column; gap: 5px; }
+.cr-row {
+  display: flex; align-items: flex-start; gap: 9px;
+  padding: 7px 10px; background: var(--bg);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--sep);
+  transition: border-color .15s;
+}
+.cr-row:hover { border-color: var(--blue-mid); }
+.cr-letter {
+  min-width: 26px; padding: 1px 0; text-align: center;
+  font-size: 0.65rem; font-weight: 800;
+  color: var(--blue); background: var(--blue-dim);
+  border-radius: 5px; letter-spacing: 0.05em;
+  flex-shrink: 0; margin-top: 1px;
+}
+.cr-key {
+  font-size: 0.65rem; font-weight: 700; color: var(--t3);
+  letter-spacing: 0.03em; flex-shrink: 0;
+  padding-top: 1px;
+}
+.cr-val {
+  font-size: 0.8rem; color: var(--t1); line-height: 1.55;
+  flex: 1;
+}
+
+/* ── CARD ACTIONS ── */
+.card-actions {
+  display: flex; align-items: center; gap: 6px;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--sep);
+  margin-top: auto;
+}
+.copy-raw-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border-radius: var(--r-pill);
+  border: none; background: var(--blue); color: white;
+  font-family: var(--font); font-size: 0.74rem; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+  box-shadow: 0 1px 4px rgba(10,132,255,0.3);
+  white-space: nowrap;
+}
+.copy-raw-btn svg { width: 11px; height: 11px; }
+.copy-raw-btn:hover { opacity: 0.85; }
+.copy-raw-btn.done {
+  background: var(--green);
+  box-shadow: 0 1px 4px rgba(48,209,88,0.3);
+}
+
+.copy-create-btn {
+  padding: 6px 13px; border-radius: var(--r-pill);
+  border: 1.5px solid var(--sep2); background: var(--bg-card);
+  color: var(--t2); font-family: var(--font);
+  font-size: 0.74rem; font-weight: 600; cursor: pointer;
+  transition: all .15s; white-space: nowrap;
+}
+.copy-create-btn:hover {
+  border-color: var(--blue); color: var(--blue);
+  background: var(--blue-dim);
+}
+.copy-create-btn.done {
+  border-color: var(--green); color: var(--green);
+  background: rgba(48,209,88,0.08);
+}
+
+.char-badge {
+  margin-left: auto; flex-shrink: 0;
+  font-size: 0.67rem; font-weight: 500; color: var(--t4);
+  background: var(--bg); padding: 2px 8px;
+  border-radius: var(--r-pill);
+}
+
+/* ═══════════════════════════════════════
+   EMPTY & TOAST
+═══════════════════════════════════════ */
+.empty {
+  grid-column: 1/-1;
+  padding: 5rem 2rem; text-align: center;
+}
+.empty-ico { font-size: 3rem; margin-bottom: 1rem; display: block; }
+.empty p { color: var(--t3); font-size: 0.9rem; line-height: 1.6; }
+
+.toast {
+  position: fixed; bottom: 2.5rem; left: 50%;
+  transform: translateX(-50%) translateY(14px);
+  background: rgba(28,28,30,0.92);
+  backdrop-filter: blur(16px);
+  color: white; padding: 10px 22px;
+  border-radius: var(--r-pill);
+  font-size: 0.82rem; font-weight: 500;
+  opacity: 0; pointer-events: none; z-index: 9999;
+  transition: all .28s cubic-bezier(.34,1.56,.64,1);
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.toast.show {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media (min-width: 900px) {
+  .section-desc { display: block; }
+}
+
+@media (max-width: 860px) {
+  .sidebar { display: none; }
+  .main { padding: 2rem 1.25rem 6rem; }
+  .nav { padding: 0 1rem; }
+  .nav-stat { display: none; }
+  .pgrid { grid-template-columns: 1fr; }
+  .builder-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 540px) {
+  .builder-grid { grid-template-columns: 1fr; }
+  .hero-h { font-size: 2rem; }
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--sep2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--t4); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-brand" href="#">
+    <div class="nav-brand-icon">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H4a2 2 0 01-2-2V5a2 2 0 012-2h16a2 2 0 012 2v10a2 2 0 01-2 2h-1"/>
+      </svg>
+    </div>
+    概念座舱 Prompts
+  </a>
+
+  <div class="nav-divider"></div>
+
+  <div class="nav-search">
+    <svg class="nav-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+    </svg>
+    <input type="text" id="searchInput" placeholder="搜索风格、场景、功能模块…" oninput="onSearch()">
+  </div>
+
+  <div class="nav-right">
+    <div class="nav-stat">共 <b id="visCount">96</b> 条</div>
+    <button class="nav-pill" id="favNavBtn" onclick="toggleFavOnly()">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+      </svg>
+      收藏 <span id="favCnt">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar"><div id="sideNav"></div></aside>
+
+  <!-- MAIN -->
+  <main class="main" id="mainArea">
+
+    <div id="heroArea">
+      <div class="hero">
+        <div class="hero-eyebrow">HMI Design · Concept Prompts</div>
+        <h1 class="hero-h">概念座舱<br><em>提示词库</em></h1>
+        <p class="hero-p">96 条专为 HMI 设计师精选的 AI 提示词，每条均内置 CREATE 框架结构化版本，适配图像生成与 AI 协作两种场景，一键复制即用。</p>
+      </div>
+
+      <div class="create-strip">
+        <div class="c-chip"><span class="c-chip-letter">C</span><span class="c-chip-name">角色 Character</span></div>
+        <div class="c-chip"><span class="c-chip-letter">R</span><span class="c-chip-name">请求 Request</span></div>
+        <div class="c-chip"><span class="c-chip-letter">E</span><span class="c-chip-name">示例 Examples</span></div>
+        <div class="c-chip"><span class="c-chip-letter">A</span><span class="c-chip-name">行动 Action</span></div>
+        <div class="c-chip"><span class="c-chip-letter">T</span><span class="c-chip-name">任务 Task</span></div>
+        <div class="c-chip"><span class="c-chip-letter">E</span><span class="c-chip-name">执行 Execution</span></div>
+      </div>
+
+      <div class="builder">
+        <div class="builder-header">
+          <div class="builder-title">
+            <div class="builder-title-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+              </svg>
+            </div>
+            提示词组合生成器
+          </div>
+          <div class="builder-sub">选择多个维度参数，自动合成完整图像生成提示词</div>
+        </div>
+        <div class="builder-grid" id="bSelects"></div>
+        <div class="bout-label">合成结果</div>
+        <div class="bout" id="bOut">请从上方选择至少两个维度…</div>
+        <div class="bactions">
+          <button class="btn-blue" onclick="copyBuild()">复制提示词</button>
+          <button class="btn-ghost" onclick="resetBuild()">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="sections"></div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CATS = [
+  { id:'visual-style', name:'视觉风格', icon:'🎨', desc:'定义整体画面的视觉语言和美学方向', prompts:[
+    { id:'s1', title:'极简科技风', tags:['Minimalism','HMI'], en:'Minimal Tech',
+      raw:'16:9中控屏智能座舱界面，极简科技风设计，悬浮式UI布局，导航地图与天气卡片组件，干净界面，柔和环境光，高端汽车HMI设计',
+      create:{ C:'资深HMI视觉设计师，专注极简科技风格', R:'为高端汽车设计16:9中控屏智能座舱界面', E:'参考苹果CarPlay极简白色界面风格', A:'采用悬浮式UI卡片布局，保持大量留白', T:'涵盖导航地图与天气信息卡片组件', EX:'输出1张完整界面效果图，柔和环境光照明，超高清渲染' }},
+    { id:'s2', title:'未来科幻风', tags:['Sci-Fi','Neon'], en:'Sci-Fi Future',
+      raw:'未来概念智能座舱界面，科幻城市驾驶场景，悬浮UI卡片布局，导航地图与车辆状态组件，未来科技风UI设计，氛围灯光效果',
+      create:{ C:'科幻概念美术总监，擅长未来主义视觉设计', R:'为概念智能座舱设计科幻风格HMI界面', E:'参考《银翼杀手2049》飞行器驾驶舱视觉语言', A:'运用霓虹光效、悬浮卡片、全息投影元素', T:'展示科幻城市驾驶场景与车辆状态面板', EX:'生成宽幅概念图，深色背景，强烈光效氛围' }},
+    { id:'s3', title:'豪华座舱风', tags:['Luxury','Premium'], en:'Luxury Cabin',
+      raw:'豪华品牌智能座舱界面设计，21:9超宽屏布局，沉浸式导航地图，金属质感UI组件，高端汽车HMI设计，沉稳深色配色',
+      create:{ C:'豪华品牌汽车内饰设计师，15年高端车型经验', R:'为旗舰豪华轿车设计21:9超宽屏HMI界面', E:'参考宾利Bentayga与梅赛德斯EQS座舱设计语言', A:'金属质感UI组件，沉稳深色配色，精密细节处理', T:'呈现沉浸式全屏导航地图与信息层级', EX:'输出超宽幅效果图，强调材质高级感与精工细节' }},
+    { id:'s4', title:'玻璃拟态风', tags:['Glassmorphism','Blur'], en:'Glassmorphism',
+      raw:'智能座舱HMI界面设计，玻璃拟态UI卡片布局，半透明导航地图组件，柔和环境光，未来感汽车界面设计，frosted glass效果',
+      create:{ C:'UI设计师，专注玻璃拟态与材质表现', R:'设计一套玻璃拟态风格的智能座舱HMI界面', E:'参考iOS毛玻璃控制中心与微软Fluent Design', A:'半透明卡片叠层，模糊背景，柔和高光边缘', T:'导航地图、状态信息等核心组件以玻璃质感呈现', EX:'渲染高精度材质效果图，注重光线折射与透明层次' }},
+    { id:'s5', title:'卡片式信息风', tags:['Card UI','Modular'], en:'Card Layout',
+      raw:'16:9车载中控屏界面，卡片式信息布局，包含导航地图卡片、天气组件、音乐播放器卡片，极简科技风智能座舱设计',
+      create:{ C:'信息架构设计师，专注模块化UI系统设计', R:'为车载中控屏设计卡片式信息布局系统', E:'参考Google Material Design卡片组件规范', A:'模块化卡片布局，清晰信息层级，圆角统一规范', T:'包含导航、天气、音乐播放器三类核心信息卡片', EX:'输出16:9比例高清界面图，展示完整卡片系统' }},
+    { id:'s6', title:'沉浸式地图风', tags:['Immersive','Map'], en:'Immersive Map',
+      raw:'智能座舱导航界面设计，沉浸式全屏地图布局，车辆周围环境可视化，简洁UI组件叠层，未来科技风汽车界面',
+      create:{ C:'地图UX设计师，专注驾驶导航体验设计', R:'设计以全屏地图为核心的沉浸式座舱导航界面', E:'参考Google Maps驾驶模式与特斯拉导航界面', A:'地图占满全屏，UI元素最小化叠加，减少驾驶干扰', T:'展示车辆周围环境可视化与关键路况信息', EX:'生成全屏宽幅导航效果图，科技感渲染风格' }},
+    { id:'s7', title:'自动驾驶可视化', tags:['ADAS','3D Viz'], en:'Autonomous Viz',
+      raw:'自动驾驶可视化界面设计，21:9超宽屏显示，道路环境识别，车辆与行人可视化渲染，科技感智能座舱UI，传感器融合视图',
+      create:{ C:'自动驾驶HMI工程师，专注感知可视化设计', R:'设计自动驾驶系统的实时环境感知可视化界面', E:'参考特斯拉Autopilot与Waymo驾驶可视化界面', A:'道路、车辆、行人以3D线框或图标实时标注', T:'展示传感器融合数据的直观可视化呈现方式', EX:'输出21:9超宽幅界面图，蓝绿科技配色，实时感强' }},
+    { id:'s8', title:'概念车UI风', tags:['Concept','Experimental'], en:'Concept Car UI',
+      raw:'概念车智能座舱界面设计，未来城市背景，悬浮UI布局，导航地图与车辆控制面板，未来科技风高端HMI设计，实验性交互元素',
+      create:{ C:'概念车设计师，专注未来出行体验探索', R:'为未来概念车设计前瞻性智能座舱UI', E:'参考奔驰VISION EQXX与宝马Vision Neue Klasse', A:'大胆实验性布局，打破传统屏幕边界，悬浮交互元素', T:'未来城市场景背景，展示革命性HMI交互概念', EX:'生成概念效果大图，强调未来感与实验性美学' }},
+    { id:'s9', title:'赛博朋克风', tags:['Cyberpunk','Neon'], en:'Cyberpunk',
+      raw:'赛博朋克风格智能座舱界面，霓虹色线条UI，深黑背景，数字雨效果，像素化信息面板，地下城市导航，高对比度配色方案',
+      create:{ C:'赛博朋克美学设计师，专注反乌托邦视觉风格', R:'以赛博朋克美学重新诠释智能座舱HMI界面', E:'参考《赛博朋克2077》界面设计与蒸汽波美学', A:'霓虹线条、像素元素、高对比度配色，营造地下城氛围', T:'地下城市导航场景，信息面板像素化处理', EX:'输出强烈霓虹光效渲染图，深黑底色，高对比视觉' }},
+    { id:'s10', title:'仿生有机风', tags:['Bionic','Organic'], en:'Bionic Organic',
+      raw:'仿生有机风格HMI设计，流动曲线UI元素，自然生长纹理，呼吸感动效，柔和渐变配色，生命感十足的界面组件，有机形态导航地图',
+      create:{ C:'仿生设计师，将自然有机形态应用于数字界面', R:'以仿生有机美学设计智能座舱HMI视觉语言', E:'参考自然界细胞结构、水流形态与植物生长规律', A:'流动曲线取代直角，柔和渐变，模拟自然纹理', T:'导航地图与功能组件均采用有机形态语言', EX:'渲染生命感强烈的界面概念图，柔和绿色调为主' }},
+    { id:'s11', title:'工业极简风', tags:['Industrial','Brutalist'], en:'Industrial Minimal',
+      raw:'工业极简风格座舱界面，粗线条几何UI，单色系深灰配色，清晰功能分区，无装饰性设计语言，高可读性仪表盘布局',
+      create:{ C:'工业设计师，专注功能优先的无装饰设计美学', R:'以工业极简主义重新设计座舱HMI界面系统', E:'参考德国包豪斯工业设计与迪特·拉姆斯设计原则', A:'粗线条几何构成，单色深灰系，去除所有装饰元素', T:'仪表盘功能区清晰分割，强调信息可读性', EX:'输出单色系工业风格概念图，高对比度文字信息呈现' }},
+    { id:'s12', title:'星际探索风', tags:['Space','Explorer'], en:'Space Explorer',
+      raw:'星际探索主题座舱HMI设计，宇宙星云背景，轨道式UI布局，星图导航组件，深空配色系统，太空舱控制面板质感',
+      create:{ C:'宇航局界面设计师，专注太空探索视觉设计', R:'以星际探索为主题设计概念座舱HMI视觉系统', E:'参考NASA控制室界面与SpaceX Dragon飞船UI', A:'轨道式圆形布局，星云背景，深空蓝绿配色系统', T:'星图导航组件与太空舱控制面板质感表达', EX:'生成宇宙感强烈的深色调概念效果图' }},
+    { id:'s13', title:'新中式国风', tags:['Chinese','Neo-Oriental'], en:'Neo-Oriental',
+      raw:'新中式国风智能座舱界面，水墨渐变背景，传统纹样UI边框，红金配色点缀，书法字体与现代字体混排，东方美学与科技感融合HMI设计',
+      create:{ C:'东方美学设计师，专注传统文化与现代科技融合', R:'以新中式美学设计智能座舱HMI界面视觉语言', E:'参考华为Mate系列与蔚来ET9的国风设计元素', A:'水墨渐变、传统纹样边框、书法字体融合现代UI', T:'红金配色系统，展现东方含蓄与现代科技的平衡', EX:'输出具有东方韵味的概念界面图，高端质感渲染' }},
+    { id:'s14', title:'复古像素风', tags:['Retro','Pixel'], en:'Retro Pixel',
+      raw:'复古像素艺术风格座舱界面，8bit像素图形UI，点阵字体，怀旧游戏机色调，CRT屏幕质感，像素化导航地图，复古科技感界面设计',
+      create:{ C:'像素艺术设计师，专注复古游戏视觉风格再创作', R:'以8bit像素艺术重新诠释汽车座舱HMI界面', E:'参考Game Boy掌机界面与雅达利主机视觉风格', A:'全部UI元素像素化处理，点阵字体，CRT扫描线效果', T:'导航地图像素化渲染，经典游戏机配色系统', EX:'输出复古感强烈的像素艺术风格概念图' }},
+    { id:'s15', title:'透明全息投影', tags:['Hologram','Transparent'], en:'Holographic',
+      raw:'全息投影透明界面设计，蓝绿色半透明UI元素，光线衍射效果，三维立体信息层，全息质感导航，未来感极强的透明HMI视觉方案',
+      create:{ C:'全息投影技术视觉设计师，专注透明界面设计', R:'设计基于全息投影技术的透明座舱HMI概念界面', E:'参考《钢铁侠》JARVIS全息界面与科幻电影概念设计', A:'蓝绿半透明UI层叠，光线衍射，三维空间信息布局', T:'导航与状态信息以全息投影质感漂浮呈现', EX:'生成极具未来感的全息概念效果大图' }},
+  ]},
+  { id:'screen-type', name:'屏幕形态', icon:'🖥', desc:'针对不同车载屏幕尺寸和形态的专用提示词', prompts:[
+    { id:'sc1', title:'16:9 中控大屏', tags:['16:9','Center'], en:'Center Screen 16:9',
+      raw:'16:9比例汽车中控触摸屏界面设计，水平布局，左侧导航地图，右侧功能控制面板，底部快捷菜单栏，高端HMI交互界面',
+      create:{ C:'车载HMI界面设计师，专注中控触摸屏体验', R:'为标准16:9中控屏设计完整的HMI界面布局', E:'参考宝马iDrive与奥迪MMI中控界面布局逻辑', A:'左侧导航为主、右侧功能控制，底部常驻快捷菜单', T:'展示完整的水平双栏布局与信息层级结构', EX:'输出标准16:9尺寸高清界面图，清晰展示各功能区' }},
+    { id:'sc2', title:'21:9 超宽屏', tags:['21:9','UltraWide'], en:'Ultrawide 21:9',
+      raw:'21:9超宽屏智能座舱界面，三栏式布局，仪表盘+中控+副驾娱乐，沉浸式视觉体验，贯穿式屏幕设计，高端豪华车HMI',
+      create:{ C:'超宽屏界面设计师，专注豪华车座舱体验', R:'为21:9贯穿式超宽屏设计三栏式座舱HMI', E:'参考梅赛德斯MBUX Hyperscreen与理想MEGA座舱', A:'三栏布局：驾驶仪表+中控信息+副驾娱乐', T:'展示贯穿式屏幕的一体化视觉体验设计', EX:'生成21:9宽幅沉浸式座舱概念效果图' }},
+    { id:'sc3', title:'数字仪表盘', tags:['Dashboard','Cluster'], en:'Digital Cluster',
+      raw:'数字仪表盘设计，速度表与转速表可视化，驾驶辅助信息显示，简洁清晰读数界面，夜间模式友好设计，高对比度仪表UI',
+      create:{ C:'仪表盘UX设计师，专注驾驶信息可读性研究', R:'设计兼顾美观与安全的数字仪表盘视觉系统', E:'参考保时捷Taycan与奔驰EQS数字仪表盘设计', A:'速度与转速为视觉核心，辅助信息清晰分层', T:'展示日间与夜间两种模式下的信息呈现方式', EX:'输出高对比度仪表盘效果图，强调信息清晰度' }},
+    { id:'sc4', title:'HUD抬头显示', tags:['HUD','AR'], en:'HUD Display',
+      raw:'AR增强现实HUD抬头显示界面，前挡风玻璃信息叠加，导航箭头投影，车速与路况提示，最小化干扰设计，半透明UI元素',
+      create:{ C:'AR界面设计师，专注增强现实驾驶体验', R:'设计前挡风玻璃AR-HUD的信息叠加界面方案', E:'参考WayRay全息HUD与大众AR-HUD量产方案', A:'导航箭头、车速、限速信息最小化叠加，不遮挡视野', T:'展示真实道路场景中的AR信息叠加视觉效果', EX:'生成驾驶员视角的AR-HUD概念合成效果图' }},
+    { id:'sc5', title:'全景贯穿屏', tags:['Panoramic','Full-width'], en:'Panoramic Screen',
+      raw:'全景贯穿式座舱屏幕设计，从驾驶员到副驾一体化屏幕，流畅内容分区，个性化显示区域，豪华品牌座舱体验',
+      create:{ C:'豪华座舱体验设计师，专注全尺寸屏幕创新', R:'设计从驾驶员延伸至副驾的全景贯穿屏方案', E:'参考梅赛德斯MBUX Hyperscreen实体产品设计', A:'一体化屏幕自然流畅的内容分区，个人化区域设定', T:'展示驾驶员与副驾各自的独立显示区域体验', EX:'输出全景贯穿屏座舱正面效果大图，豪华质感' }},
+    { id:'sc6', title:'竖屏中控', tags:['Portrait','Vertical'], en:'Portrait Center',
+      raw:'竖向超长屏中控界面设计，竖版UI布局，上方导航地图区域，中部功能卡片，底部系统控制，特斯拉风格HMI设计',
+      create:{ C:'竖屏HMI设计师，专注竖向交互体验研究', R:'为超大竖屏中控设计完整的竖向布局HMI系统', E:'参考特斯拉Model 3/Y中控屏与小鹏P7布局逻辑', A:'上方导航大图、中部功能卡片、底部系统控制三段式', T:'展示竖版布局下的信息层级与手势交互逻辑', EX:'输出竖版超长屏完整UI截图，清晰展示各功能区划分' }},
+    { id:'sc7', title:'仪表+中控双联屏', tags:['Dual Screen','Twin'], en:'Dual Screen',
+      raw:'双联屏智能座舱设计，左侧数字仪表盘，右侧中控触摸屏，统一设计语言，数据联动显示，无边框一体化视觉效果',
+      create:{ C:'双屏联动HMI设计师，专注屏幕间信息协同', R:'设计仪表盘与中控屏无缝联动的双联屏界面系统', E:'参考奥迪Q8与奔驰GLE双屏一体化设计语言', A:'统一视觉语言，左右屏信息互联互动，无边框过渡', T:'展示两屏间数据联动与内容延伸的交互逻辑', EX:'生成双联屏一体化座舱效果图，强调视觉统一性' }},
+    { id:'sc8', title:'后排娱乐屏', tags:['Rear','Entertainment'], en:'Rear Entertainment',
+      raw:'后排乘客娱乐屏界面设计，头枕式显示屏，流媒体视频布局，游戏交互界面，独立空调控制面板，个人娱乐中心HMI',
+      create:{ C:'后排乘客体验设计师，专注移动娱乐系统设计', R:'为后排头枕屏设计完整的个人娱乐中心HMI', E:'参考迈巴赫后排娱乐系统与劳斯莱斯幻影座舱', A:'流媒体视频、游戏、空调三大区块清晰分区', T:'展示后排乘客独立控制的个人化娱乐体验界面', EX:'输出头枕屏娱乐中心完整UI概念图，精致豪华质感' }},
+    { id:'sc9', title:'副驾专属屏', tags:['Co-pilot','Passenger'], en:'Co-pilot Screen',
+      raw:'副驾专属触控屏界面设计，乘客独立内容控制，娱乐资讯浏览，辅助导航搜索，不干扰驾驶员的信息分层，副驾驶专属交互体验HMI',
+      create:{ C:'乘客体验设计师，专注副驾驶交互系统研究', R:'为副驾专属屏设计独立的乘客操控HMI体验', E:'参考梅赛德斯MBUX副驾屏与理想L9副驾娱乐屏', A:'独立娱乐浏览、辅助导航搜索，与驾驶员区域隔离', T:'展示副驾驶员自主操控的完整内容体验界面', EX:'生成副驾专属屏UI全图，清晰呈现内容分区逻辑' }},
+  ]},
+  { id:'function-module', name:'功能模块', icon:'⚙️', desc:'特定车载功能模块的界面提示词', prompts:[
+    { id:'f1', title:'导航地图模块', tags:['Navigation','Map'], en:'Navigation Map',
+      raw:'车载导航地图UI组件，3D实时地图渲染，道路高亮与转弯指示，ETA与距离显示，周边POI标注，简洁路线规划界面，夜间地图模式',
+      create:{ C:'车载导航UX设计师，专注驾驶地图交互体验', R:'设计车载中控屏核心导航地图UI模块', E:'参考Google Maps驾驶模式与百度地图车机版交互', A:'3D实时地图为主体，路线高亮，转弯箭头清晰可读', T:'展示日间/夜间地图模式与周边POI标注效果', EX:'输出导航地图完整UI截图，两种模式对比展示' }},
+    { id:'f2', title:'能量管理界面', tags:['EV','Energy'], en:'Energy Management',
+      raw:'新能源汽车能量管理界面，电池电量可视化，充电状态动画，续航里程预测，能量回收流动效果，功耗分析图表，充电站地图',
+      create:{ C:'新能源车HMI设计师，专注能量可视化交互设计', R:'设计纯电汽车的核心能量管理界面系统', E:'参考特斯拉能量管理界面与比亚迪DiLink能耗图表', A:'电量圆环可视化，续航预测曲线，能量流动动效', T:'展示充电状态、续航分析与充电站地图三大模块', EX:'生成能量管理界面全图，科技感强，数据可视化清晰' }},
+    { id:'f3', title:'智能空调控制', tags:['HVAC','Climate'], en:'Climate Control',
+      raw:'智能座舱空调控制界面，温度调节可视化，风向与风量控制，座椅加热/通风图示，多区域温控面板，空气质量传感器显示',
+      create:{ C:'座舱环境体验设计师，专注热舒适度交互研究', R:'设计直觉化的智能空调多区域温控界面', E:'参考沃尔沃座舱空调界面与宝马Climate Control', A:'温度旋钮可视化，风向动态图示，座椅热力图展示', T:'覆盖驾驶员/副驾/后排多区域独立温控操作', EX:'输出空调控制界面全图，清晰呈现各区域控制逻辑' }},
+    { id:'f4', title:'音频娱乐系统', tags:['Audio','Music'], en:'Audio Entertainment',
+      raw:'车载音频娱乐界面，音乐播放器UI，均衡器可视化，专辑封面大图展示，歌词显示，车内音效空间模拟，多媒体源切换面板',
+      create:{ C:'车载娱乐系统UX设计师，专注音频交互体验', R:'设计沉浸式车载音频娱乐系统界面', E:'参考Apple Music车载界面与索尼Xplod音效系统', A:'专辑封面全屏展示，歌词同步，均衡器波形可视化', T:'展示流媒体、本地音乐、多媒体源快速切换界面', EX:'生成音乐播放器界面全图，视觉沉浸感强' }},
+    { id:'f5', title:'驾驶辅助面板', tags:['ADAS','Safety'], en:'Driver Assist',
+      raw:'驾驶辅助系统状态面板，ACC自适应巡航设置，车道保持激活状态，前方车辆距离可视化，驾驶员监控状态，安全预警提示UI',
+      create:{ C:'ADAS系统HMI工程师，专注驾驶安全界面设计', R:'设计驾驶辅助系统的实时状态监控面板界面', E:'参考特斯拉Autopilot与小鹏智能驾驶状态界面', A:'ACC状态、车道保持、前车距离实时可视化，清晰直观', T:'展示各辅助功能激活状态与安全预警信息层级', EX:'输出驾驶辅助面板全图，强调安全信息清晰可读性' }},
+    { id:'f6', title:'语音助手界面', tags:['Voice','AI'], en:'Voice Assistant',
+      raw:'车载AI语音助手交互界面，声纹波形动画，语音识别状态指示，对话气泡布局，语义理解可视化，智能推荐卡片，自然语言交互UI',
+      create:{ C:'对话式AI界面设计师，专注车载语音交互体验', R:'设计自然直觉的车载AI语音助手交互界面', E:'参考蔚来NOMI与小爱同学车机版交互界面设计', A:'声纹波形为视觉核心，对话气泡清晰，推荐卡片自然展开', T:'展示语音指令识别过程与智能推荐结果呈现方式', EX:'生成语音助手完整交互界面图，AI科技感鲜明' }},
+    { id:'f7', title:'泊车辅助系统', tags:['Parking','360°'], en:'Parking Assist',
+      raw:'智能泊车辅助界面，360°全景摄像头视图，泊车轨迹线动画，超声波传感器可视化，泊车进度指示，倒车引导UI，车位识别高亮',
+      create:{ C:'泊车系统UX设计师，专注低速操控辅助界面', R:'设计完整的智能泊车辅助视觉引导界面系统', E:'参考丰田全景泊车系统与极氪自动泊车界面', A:'360°全景视图分屏，轨迹线动态预览，传感器热力图', T:'展示车位识别高亮与泊车进度全流程界面', EX:'输出泊车辅助系统界面全图，清晰展示360°视角' }},
+    { id:'f8', title:'车辆状态监控', tags:['Vehicle Status','Monitor'], en:'Vehicle Monitor',
+      raw:'车辆实时状态监控界面，轮胎气压可视化，车门开关状态，油液水位指示，故障诊断信息，车身3D模型状态显示，预防性维保提醒',
+      create:{ C:'车辆健康管理系统设计师，专注预防性维保体验', R:'设计车辆全系统实时健康状态监控界面', E:'参考宝马Remote App与奔驰Me Connect状态监控', A:'3D车身模型为中心，各系统状态以颜色编码展示', T:'覆盖轮胎、车门、油液、故障码四大监控维度', EX:'生成车辆状态监控界面全图，数据清晰层次分明' }},
+    { id:'f9', title:'手机互联界面', tags:['CarPlay','Android Auto'], en:'Phone Mirror',
+      raw:'CarPlay/Android Auto镜像界面设计，手机应用投屏布局，通知栏集成，常用APP快速启动，Siri/Google Assistant集成，无缝切换动效',
+      create:{ C:'手机车机互联设计师，专注跨设备体验一致性', R:'设计CarPlay与Android Auto的车机互联界面方案', E:'参考苹果CarPlay与Google Android Auto标准界面规范', A:'手机应用投屏清晰，通知与助手快速调用，切换流畅', T:'展示主流App在车机屏幕上的适配展示效果', EX:'输出互联状态下完整界面图，展示手机与车机协同' }},
+    { id:'f10', title:'座舱氛围灯控制', tags:['Ambient','Mood'], en:'Ambient Light',
+      raw:'座舱氛围灯控制界面，16M色彩选择器，区域独立控制，情绪模式预设，随音乐律动效果，驾驶场景自动切换，灯光强度调节',
+      create:{ C:'座舱氛围体验设计师，专注光与情绪的交互设计', R:'设计直觉化的智能座舱氛围灯控制界面系统', E:'参考蔚来氛围灯控制与宝马Ambient Light交互设计', A:'色彩选择器直观，区域独立控制，情绪模式一键切换', T:'展示16M色彩选择、场景预设、随音律动三大功能', EX:'生成氛围灯控制界面图，配合真实座舱环境光效渲染' }},
+    { id:'f11', title:'行程记录系统', tags:['Trip','Log'], en:'Trip Logger',
+      raw:'行程记录与分析界面，驾驶轨迹地图回放，驾驶行为评分可视化，油耗/能耗统计图表，里程与时间分析，驾驶习惯优化建议',
+      create:{ C:'驾驶数据分析设计师，专注用车行为可视化', R:'设计帮助用户了解驾驶习惯的行程分析界面', E:'参考特斯拉行程统计与蔚来能源分析仪表盘', A:'地图轨迹回放、评分雷达图、能耗趋势曲线组合呈现', T:'展示单次行程与长期驾驶习惯两种数据粒度', EX:'输出行程分析仪表盘全图，数据可视化设计精美' }},
+    { id:'f12', title:'远程控车App', tags:['Remote','App'], en:'Remote Control App',
+      raw:'手机端远程控车应用界面，车辆状态实时监控，远程启动/锁车，空调预约设置，位置追踪地图，用车报告仪表盘，推送通知管理',
+      create:{ C:'手机App设计师，专注车联网远程控制交互', R:'设计功能完整的手机端远程控车应用界面', E:'参考特斯拉App与小鹏汽车App的远程控制体验', A:'车辆状态卡片为首页核心，远程操控快捷清晰', T:'覆盖远程启动、空调预约、位置追踪三大核心功能', EX:'生成手机App界面全图，清晰展示远程控车核心流程' }},
+  ]},
+  { id:'atmosphere', name:'场景氛围', icon:'🌃', desc:'通过场景营造特定的驾驶情境感', prompts:[
+    { id:'a1', title:'雨夜城市驾驶', tags:['Night','Rain','City'], en:'Rainy Night City',
+      raw:'雨夜城市场景智能座舱界面，窗外霓虹倒影，界面暖光柔和，路况预警信息，雨刷频率控制，路况感知可视化，低照度UI模式',
+      create:{ C:'场景化HMI设计师，专注驾驶情境自适应界面', R:'为雨夜城市驾驶场景设计自适应座舱HMI界面', E:'参考雨天驾驶辅助系统设计案例与低照度界面标准', A:'界面自动切换护眼暖色模式，路况预警突出显示', T:'展示雨天特有的雨刷控制、能见度警示等功能面板', EX:'生成雨夜城市背景的座舱概念效果图，霓虹反光氛围' }},
+    { id:'a2', title:'晴天高速巡航', tags:['Highway','Day'], en:'Highway Cruise',
+      raw:'晴天高速公路场景座舱界面，明亮清晰显示模式，巡航控制面板，速度与距离可视化，绿色高速驾驶评分，舒适行车氛围UI',
+      create:{ C:'高速行驶体验设计师，专注长途巡航界面优化', R:'为晴天高速巡航场景设计舒适驾驶座舱界面', E:'参考ACC自适应巡航系统界面与Autobahn驾驶体验', A:'明亮清晰模式，巡航参数一目了然，评分鼓励系统', T:'展示高速巡航状态下的速度、距离、油耗等核心信息', EX:'输出晴天高速场景概念图，宽阔道路背景，清爽明亮' }},
+    { id:'a3', title:'越野探险模式', tags:['Off-road','Terrain'], en:'Off-Road Adventure',
+      raw:'越野探险驾驶模式界面，地形识别可视化，倾斜角度指示，四驱系统状态，路况扭矩分配，越野导航地图，车辆攀爬角度仪',
+      create:{ C:'越野车HMI工程师，专注极限地形驾驶辅助系统', R:'为越野探险场景设计专项驾驶辅助HMI界面', E:'参考路虎Terrain Response与牧马人ICON越野模式界面', A:'地形识别、倾斜角、四驱分配实时可视化展示', T:'展示越野专属的坡度仪、扭矩分配、地形地图功能', EX:'生成越野场景概念图，泥地山地背景，专业越野质感' }},
+    { id:'a4', title:'城市早高峰', tags:['Traffic','Peak'], en:'Morning Rush',
+      raw:'城市早高峰通勤场景界面，实时路况热力图，拥堵预测分析，智能绕路建议，停车场余位查询，日程与ETA整合，能耗优化路线',
+      create:{ C:'城市通勤体验设计师，专注高频日常用车场景', R:'为早高峰通勤场景设计效率优先的座舱HMI界面', E:'参考高德地图车机版与腾讯地图智能路线推荐', A:'路况热力图醒目，绕路建议快速确认，ETA与日历联动', T:'展示拥堵预测、智能绕路、停车场余位三大功能', EX:'输出早高峰城市场景概念图，繁忙城区道路背景' }},
+    { id:'a5', title:'深夜归家场景', tags:['Late Night','Home'], en:'Night Return',
+      raw:'深夜归家驾驶场景，护眼深色模式，自动降低屏幕亮度，回家路线快捷导航，疲劳驾驶预警，轻音乐模式自动激活，到家提醒',
+      create:{ C:'夜间驾驶安全体验设计师，专注疲劳驾驶防护', R:'为深夜归家场景设计低干扰安全护眼座舱界面', E:'参考汽车夜间驾驶辅助系统设计规范与疲劳检测案例', A:'自动深色模式、亮度最低、疲劳预警优先级最高', T:'展示回家路线快捷导航与疲劳驾驶检测界面', EX:'生成深夜城市场景概念图，温暖路灯背景，安全感氛围' }},
+    { id:'a6', title:'雪地冬日驾驶', tags:['Snow','Winter'], en:'Winter Driving',
+      raw:'冬日雪地驾驶场景界面，路面结冰预警，雪地驾驶模式激活，胎压与抓地力监控，车辆加热系统控制，能见度辅助，积雪路况地图',
+      create:{ C:'冬季驾驶安全设计师，专注极端天气驾驶辅助', R:'为冬日雪地驾驶场景设计安全专项HMI界面', E:'参考沃尔沃冬季驾驶辅助系统与北欧极端天气HMI规范', A:'结冰预警醒目显示，雪地模式激活确认，热力系统快捷', T:'展示轮胎抓地力监控、积雪地图、能见度辅助等功能', EX:'输出雪地场景概念图，白雪覆盖道路背景，安全感强' }},
+    { id:'a7', title:'快充站停留', tags:['Charging','Rest'], en:'Charging Stop',
+      raw:'快充站停留场景界面，充电进度可视化动画，充电功率曲线，预计充满时间，附近餐饮休息推荐，OTA更新进度，充电报告生成',
+      create:{ C:'新能源车停留体验设计师，专注充电场景服务设计', R:'为快充站停留场景设计完整的充电体验界面', E:'参考特斯拉Supercharger界面与蔚来换电站体验设计', A:'充电进度圆环醒目，功率曲线直观，周边服务卡片', T:'展示充电进度、OTA更新、附近服务推荐三大模块', EX:'生成快充站场景概念图，展示停车充电全场景体验' }},
+    { id:'a8', title:'长途公路旅行', tags:['Road Trip','Travel'], en:'Road Trip',
+      raw:'长途公路旅行模式界面，全程路线规划，服务区分布标注，途经景点推荐，多人行程管理，旅途音乐氛围，里程碑节点提示',
+      create:{ C:'旅行场景体验设计师，专注长途出行服务整合', R:'为长途公路旅行场景设计一站式行程管理界面', E:'参考途途旅行规划App与特斯拉长途导航体验', A:'全程路线概览，服务区自动标注，景点推荐卡片插入', T:'展示多人行程管理与里程碑节点庆祝互动设计', EX:'输出公路旅行场景概念图，宽阔公路与美景背景' }},
+    { id:'a9', title:'隧道穿越场景', tags:['Tunnel','Transition'], en:'Tunnel Transit',
+      raw:'隧道穿越过渡场景HMI界面，自动亮度调节动效，GPS信号切换提示，隧道内导航保持，出口提前预警，视觉过渡动画，驾驶情境自适应UI',
+      create:{ C:'情境感知HMI设计师，专注场景切换过渡体验', R:'设计进出隧道场景的自适应过渡HMI界面方案', E:'参考BMW情境感知系统与奥迪隧道亮度自适应设计', A:'亮度平滑过渡动效，GPS离线导航无缝切换', T:'展示隧道入口/行驶中/出口三个阶段的界面变化', EX:'生成隧道穿越场景概念图，光线强烈变化过渡效果' }},
+    { id:'a10', title:'海滨公路驾驶', tags:['Coastal','Scenic'], en:'Coastal Drive',
+      raw:'海滨公路休闲驾驶场景，明亮清新界面配色，风景模式激活，车窗控制快捷面板，海风温度提示，沿途景点地图标注，轻松驾驶氛围UI',
+      create:{ C:'休闲驾驶体验设计师，专注美景公路出行场景', R:'为海滨公路休闲驾驶设计轻松愉悦的座舱界面', E:'参考加州公路风情与大众Golf系列休闲出行模式', A:'清新明亮界面，车窗控制突出，沿途景点轻量标注', T:'展示海风温度提示、景点推荐与休闲音乐模式', EX:'输出海滨公路场景概念图，蓝天大海背景，轻松氛围' }},
+    { id:'a11', title:'城市停车导航', tags:['Parking','Urban'], en:'Urban Parking',
+      raw:'城市停车导航场景界面，实时停车场余位显示，价格对比卡片，步行距离标注，电子停车缴费入口，车位预约功能，地下停车场引导UI',
+      create:{ C:'城市出行服务设计师，专注停车场景用户体验', R:'设计城市停车全流程辅助导航界面系统', E:'参考ETCP停车App与特斯拉停车推荐功能设计', A:'余位实时更新，价格与距离对比卡片直观，缴费一步完成', T:'展示地面停车场与地下车库两种场景的引导界面', EX:'生成城市停车导航界面图，地图与停车场信息清晰呈现' }},
+    { id:'a12', title:'早晨出发准备', tags:['Morning','Routine'], en:'Morning Departure',
+      raw:'清晨出发准备场景HMI界面，今日行程总览卡片，预计天气与路况，车内温度预热状态，常用目的地快捷导航，早间新闻简报，柔和晨光界面风格',
+      create:{ C:'日常通勤服务设计师，专注出行前场景体验优化', R:'设计清晨出发前的智能座舱准备状态界面', E:'参考Google Now出行卡片与蔚来NOMI早安问候交互', A:'行程摘要、天气路况、预热状态三合一首屏展示', T:'展示常用目的地快速启动与早间简报信息聚合', EX:'输出清晨温馨出发场景概念图，金色晨光背景氛围' }},
+  ]},
+  { id:'interaction-type', name:'交互形态', icon:'✋', desc:'不同交互方式下的界面概念提示词', prompts:[
+    { id:'i1', title:'触控手势操作', tags:['Touch','Gesture'], en:'Touch Gesture',
+      raw:'基于触控手势的HMI界面设计，滑动缩放导航地图，捏合收展功能面板，长按快捷操作，多指触控交互反馈，手势轨迹可视化',
+      create:{ C:'触控交互设计师，专注手势操控体验研究', R:'设计以手势为核心的车载HMI触控交互界面系统', E:'参考iPad多指手势操控与特斯拉触控交互规范', A:'常用手势图解清晰，操控反馈即时，误触率控制', T:'展示滑动、捏合、长按三种核心手势的界面反馈', EX:'生成手势交互概念图，展示手部与界面的交互过程' }},
+    { id:'i2', title:'实体旋钮联动', tags:['Knob','Physical'], en:'Physical Knob',
+      raw:'实体旋钮与数字界面融合设计，旋转选择高亮状态，触觉反馈可视化，物理按键对应界面区域高亮，混合交互HMI界面',
+      create:{ C:'物理数字融合交互设计师，专注混合操控体验', R:'设计实体旋钮与数字屏幕协同操控的HMI界面', E:'参考宝马iDrive旋钮系统与保时捷PCM物理按键布局', A:'旋钮转动时界面对应区域实时高亮响应', T:'展示物理旋钮与屏幕选项之间的视觉映射关系', EX:'输出物理旋钮+数字界面融合概念图，质感精致' }},
+    { id:'i3', title:'眼动追踪控制', tags:['Eye-tracking','Gaze'], en:'Eye Tracking',
+      raw:'眼动追踪控制界面设计，视线焦点高亮区域，注视确认交互，眼神滚动浏览，自适应信息聚焦，低分心驾驶交互模式',
+      create:{ C:'眼动交互研究设计师，专注免手操控驾驶体验', R:'设计基于眼动追踪技术的座舱交互界面方案', E:'参考Tobii眼控技术与Smart Eye驾驶监控系统', A:'视线焦点区域柔和高亮，注视停留确认替代触控', T:'展示信息聚焦自适应与驾驶员监控双重功能', EX:'生成眼动追踪交互概念图，展示视线路径与界面响应' }},
+    { id:'i4', title:'手势空中交互', tags:['Mid-air','Gesture3D'], en:'Mid-air Gesture',
+      raw:'手势识别空中交互界面，3D手势操控可视化，手部追踪轨迹显示，无接触操控高亮，悬浮菜单激活动效，手势指令反馈界面',
+      create:{ C:'空中手势交互设计师，专注无接触操控体验创新', R:'设计基于毫米波雷达的空中手势控制HMI界面', E:'参考宝马Gesture Control与大陆3D手势识别系统', A:'手部轨迹实时可视化，悬浮菜单随手势位置出现', T:'展示拨动、旋转、推拉三种核心空中手势指令', EX:'输出空中手势交互概念图，手部轨迹光影效果' }},
+    { id:'i5', title:'脑机接口概念', tags:['BCI','Concept'], en:'BCI Interface',
+      raw:'脑机接口概念座舱界面，神经信号可视化波形，意念操控状态指示，认知负荷监测仪表，意识流导航概念设计，未来感极强',
+      create:{ C:'脑机接口概念设计师，专注神经交互未来场景', R:'设计2035年脑机接口驾驶座舱的概念HMI界面', E:'参考Neuralink技术概念图与《攻壳机动队》界面设计', A:'神经信号波形为视觉核心，意念触发界面反馈动效', T:'展示认知负荷监测仪表与意识流导航交互概念', EX:'生成极具未来感的脑机接口概念大图，科幻美学' }},
+    { id:'i6', title:'语音交互动效', tags:['Voice Wave','Animation'], en:'Voice Animation',
+      raw:'语音交互视觉反馈界面，声纹波形动画，语音识别进度环，关键词高亮显示，AI思考状态动效，语音指令历史面板',
+      create:{ C:'语音交互动效设计师，专注音频可视化体验', R:'设计语音指令全流程的动态视觉反馈界面系统', E:'参考Siri语音波形动效与Amazon Echo视觉反馈设计', A:'声纹波形跟随音量实时变化，关键词识别后高亮脉冲', T:'覆盖聆听中、识别中、处理中、回复中四个状态', EX:'输出语音交互动效概念图，展示完整交互流程状态' }},
+    { id:'i7', title:'情绪感知界面', tags:['Emotion','Adaptive'], en:'Emotion Sensing',
+      raw:'情绪感知自适应界面，驾驶员表情识别状态，情绪化色彩系统响应，舒缓/激活音乐推荐，驾驶风格动态调整，心理状态监控面板',
+      create:{ C:'情感计算交互设计师，专注驾驶员情绪感知体验', R:'设计基于人脸识别的情绪感知自适应座舱界面', E:'参考affectiva情绪识别系统与Soul Machines情感AI', A:'界面色彩随检测情绪状态动态响应，音乐智能推荐', T:'展示情绪识别结果展示与对应座舱环境自适应逻辑', EX:'生成情绪感知概念图，展示不同情绪状态下的界面变化' }},
+    { id:'i8', title:'多人协作模式', tags:['Multi-user','Collab'], en:'Multi-user Mode',
+      raw:'多人协同智能座舱界面，驾驶员与副驾不同控制权限，共享导航规划，乘客娱乐独立控制，家庭出行个性化面板，权限切换可视化',
+      create:{ C:'多用户体验设计师，专注家庭共乘场景权限设计', R:'设计家庭多人出行场景的协同控制HMI界面系统', E:'参考家庭版特斯拉多用户配置与理想L9家庭模式', A:'驾驶员/副驾/后排权限清晰分层，内容共享简单直接', T:'展示导航共同规划与各区域独立娱乐的界面逻辑', EX:'输出多人协作座舱概念图，展示各区域功能权限分布' }},
+    { id:'i9', title:'盲操无视线控制', tags:['Blind Op','Haptic'], en:'Blind Operation',
+      raw:'盲操无视线触控HMI界面，物理纹理边界触感反馈，大面积手势区域，语音+触觉双通道确认，极简操作路径，驾驶安全优先交互设计',
+      create:{ C:'驾驶安全交互设计师，专注零视线转移操控研究', R:'设计驾驶员无需低头的盲操触控HMI界面方案', E:'参考Haptx触觉反馈技术与汽车盲操按键设计规范', A:'纹理边界触觉引导，大区域手势，双通道操作确认', T:'展示常用功能的最短操控路径与触觉反馈设计', EX:'生成盲操交互概念图，强调安全优先的简洁操控界面' }},
+    { id:'i10', title:'手机NFC碰一碰', tags:['NFC','Mobile'], en:'NFC Tap',
+      raw:'NFC碰一碰车机互联界面，手机靠近瞬间激活动效，个人偏好一键同步，数字钥匙状态确认，账户切换动画，近场感应交互视觉反馈',
+      create:{ C:'近场交互设计师，专注手机与车机无缝连接体验', R:'设计NFC碰一碰激活的手机车机互联界面方案', E:'参考Apple CarKey与华为NFC车钥匙交互设计', A:'碰触瞬间光圈扩散动效，偏好自动同步进度可视化', T:'展示数字钥匙认证与个人账户切换的完整流程', EX:'输出NFC交互概念图，手机靠近车机的激活动效视觉' }},
+    { id:'i11', title:'方向盘快捷操控', tags:['Steering','Shortcut'], en:'Steering Control',
+      raw:'方向盘快捷键映射HMI界面，按键功能可视化对应，操控状态实时高亮，左手/右手功能分区，驾驶模式快捷切换，拨片换挡确认动效',
+      create:{ C:'方向盘交互设计师，专注主要驾驶控制体验优化', R:'设计方向盘快捷键与中控屏的视觉映射HMI界面', E:'参考保时捷方向盘多功能按键系统与特斯拉滚轮设计', A:'按键按下时屏幕对应区域即时高亮响应确认', T:'展示左右手分区的功能逻辑与拨片换挡反馈', EX:'生成方向盘操控概念图，展示按键与界面的响应映射' }},
+    { id:'i12', title:'儿童安全锁模式', tags:['Child','Safety Lock'], en:'Child Safety Mode',
+      raw:'儿童安全锁模式HMI界面，家长控制面板，后排权限限制可视化，内容过滤状态指示，紧急解锁确认流程，儿童友好界面切换，家庭安全模式激活动效',
+      create:{ C:'家庭安全体验设计师，专注儿童乘车安全系统', R:'设计家长管控儿童后排操作权限的HMI界面系统', E:'参考苹果Screen Time家长控制与儿童模式交互设计', A:'家长端简洁开关控制，儿童端内容过滤友好提示', T:'展示权限限制状态、内容过滤与紧急解锁三个场景', EX:'输出家庭安全模式概念图，温馨安全感视觉风格' }},
+  ]},
+  { id:'brand-style', name:'品牌方向', icon:'🏷', desc:'对标主流汽车品牌设计语言的参考提示词', prompts:[
+    { id:'b1', title:'德系豪华风格', tags:['German','Luxury'], en:'German Luxury',
+      raw:'德系豪华品牌座舱界面，精准对称布局，金属银灰色系，精密机械质感UI，克制装饰细节，高精度仪表盘，BMW/奔驰/奥迪设计语言参考',
+      create:{ C:'德系豪华品牌HMI设计总监，专注精工细节美学', R:'以德系豪华品牌设计语言创作座舱HMI概念界面', E:'参考宝马iX、梅赛德斯EQS与奥迪e-tron GT座舱设计', A:'精准对称构图，金属银灰主调，每个细节精密克制', T:'展示高精度数字仪表与中控信息面板整体设计', EX:'生成德系豪华风格座舱概念图，精密工艺感渲染' }},
+    { id:'b2', title:'特斯拉极简风', tags:['Tesla','Minimalism'], en:'Tesla Minimal',
+      raw:'特斯拉风格超大竖屏界面，白色极简设计，全触控操作，最小化实体按键，软件定义功能布局，OTA升级提示，能源管理为核心',
+      create:{ C:'硅谷科技汽车设计师，专注软件定义汽车体验', R:'以特斯拉设计哲学创作竖屏中控HMI概念界面', E:'直接参考特斯拉Model 3/Y/S系列中控屏设计语言', A:'极简白色，零实体按键，能源管理为首要信息', T:'展示软件定义功能灵活布局与OTA升级提示设计', EX:'输出特斯拉风格竖屏界面图，纯净白色极简渲染' }},
+    { id:'b3', title:'中国新能源风', tags:['China NEV','Future'], en:'China NEV',
+      raw:'中国新能源汽车品牌HMI风格，科技感强，国风元素融合，大屏悬浮设计，AI助手中心化，问界/蔚来/小鹏设计语言，智能生态整合',
+      create:{ C:'中国新能源品牌HMI设计师，专注智能生态整合', R:'以中国新势力品牌设计语言创作座舱HMI概念界面', E:'参考问界M9、蔚来ET9与小鹏X9座舱HMI设计语言', A:'AI助手居中突出，国风元素融合科技感，大屏悬浮', T:'展示智能生态联动与AI对话交互核心界面设计', EX:'生成中国新能源品牌风格座舱概念图，科技国风并重' }},
+    { id:'b4', title:'日系简约亲切', tags:['Japanese','Friendly'], en:'Japanese Minimal',
+      raw:'日系汽车品牌HMI风格，温馨简洁界面，米色暖调配色，圆润UI组件，人性化信息层级，自然材质质感，丰田/本田/日产设计语言',
+      create:{ C:'日系汽车人因工程设计师，专注人性化界面体验', R:'以日系品牌设计语言创作温馨简约座舱HMI界面', E:'参考丰田bZ4X、本田e与日产Ariya座舱HMI设计', A:'米色暖调，圆润组件，信息层级简单直接亲切', T:'展示日系品牌标志性的简洁操控面板与信息呈现', EX:'输出日系温馨风格座舱概念图，自然材质感渲染' }},
+    { id:'b5', title:'超跑运动风格', tags:['Sports','Performance'], en:'Sports Performance',
+      raw:'超跑性能车座舱界面，红色激活色调，赛道模式UI，G值与加速度可视化，发动机状态监控，圈速计时面板，法拉利/保时捷风格',
+      create:{ C:'超跑HMI设计师，专注极限性能驾驶信息可视化', R:'以超跑美学创作性能驾驶专属座舱HMI概念界面', E:'参考法拉利Roma内饰与保时捷Taycan运动模式界面', A:'红色激活色调，G值与加速度核心，圈速计时突出', T:'展示赛道模式下的性能数据实时监控面板', EX:'生成超跑风格座舱概念图，激进运动美学渲染' }},
+    { id:'b6', title:'越野硬派风格', tags:['Off-road','Rugged'], en:'Off-road Rugged',
+      raw:'越野硬派车型HMI设计，深色军绿配色，粗犷UI线条，地形感知面板，四驱模式切换，户外导航专项，牧马人/路虎风格',
+      create:{ C:'越野车内饰设计师，专注极限地形驾驶辅助系统', R:'以越野硬派风格创作专项驾驶座舱HMI概念界面', E:'参考Jeep牧马人Uconnect与路虎Defender座舱设计', A:'军绿深色主调，粗线条几何UI，地形感知数据优先', T:'展示四驱模式切换面板与户外专属导航界面设计', EX:'输出越野硬派风格座舱概念图，粗犷工业感渲染' }},
+    { id:'b7', title:'MPV家庭舒适', tags:['MPV','Family'], en:'MPV Family',
+      raw:'多用途家庭MPV座舱界面，温馨舒适视觉风格，后排乘客管理，儿童模式锁定，家庭出行行程规划，多媒体共享，埃尔法/奥德赛风格',
+      create:{ C:'家庭出行体验设计师，专注多人共乘舒适交互', R:'以家庭MPV场景创作温馨舒适座舱HMI概念界面', E:'参考丰田埃尔法与本田奥德赛家庭版座舱设计', A:'温暖配色，后排管理操控简单，儿童锁清晰可见', T:'展示家庭多人出行的行程规划与后排娱乐管理', EX:'生成家庭MPV风格座舱概念图，温馨舒适感渲染' }},
+    { id:'b8', title:'商务行政风格', tags:['Business','Executive'], en:'Business Executive',
+      raw:'商务行政轿车座舱界面，沉稳深色系，商务日历整合，电话会议面板，高效导航，隐私分区设计，宾利/迈巴赫风格参考',
+      create:{ C:'行政座驾体验设计师，专注商务出行高效场景', R:'以行政轿车美学创作商务专属座舱HMI概念界面', E:'参考宾利Continental GT与梅赛德斯迈巴赫座舱设计', A:'沉稳深色系，商务日历优先，会议与通话快速接入', T:'展示隐私分区设计与高效导航商务信息整合', EX:'输出行政豪车风格座舱概念图，奢华沉稳质感渲染' }},
+    { id:'b9', title:'北欧简约风格', tags:['Nordic','Scandi'], en:'Nordic Minimal',
+      raw:'北欧简约汽车HMI风格，米白浅木色系，自然材质质感，柔和圆角组件，极简功能分区，斯堪的纳维亚设计美学，沃尔沃/极星设计语言参考',
+      create:{ C:'北欧设计师，专注斯堪的纳维亚简约美学', R:'以北欧设计哲学创作极简自然座舱HMI概念界面', E:'参考沃尔沃EX90与极星Polestar 2座舱设计语言', A:'米白浅木色，自然材质纹理，圆角柔和，功能极简', T:'展示北欧美学下的信息层级与自然感操控界面', EX:'生成北欧简约风格座舱概念图，自然木白色系渲染' }},
+    { id:'b10', title:'美式肌肉风格', tags:['American','Muscle'], en:'American Muscle',
+      raw:'美式肌肉车座舱界面设计，深黑红配色，仪表盘激进风格，大排量发动机数据可视化，赛道驾驶模式面板，道奇/福特马斯坦风格参考',
+      create:{ C:'美式性能车设计师，专注肌肉车视觉文化传承', R:'以美式肌肉车文化创作豪横座舱HMI概念界面', E:'参考道奇Challenger与福特野马Mustang GT座舱设计', A:'深黑底红色激活，大排量数据核心，赛道感激进布局', T:'展示发动机状态监控与赛道模式专属驾驶信息面板', EX:'输出美式肌肉风格座舱概念图，强烈视觉冲击感渲染' }},
+    { id:'b11', title:'电动科技新势力', tags:['EV','Startup'], en:'EV Tech Startup',
+      raw:'新势力电动品牌HMI设计语言，大面积深色系，流动渐变激活色，AI功能优先布局，OTA升级动效，生态互联展示，Rivian/Lucid风格参考',
+      create:{ C:'硅谷电动车创业设计师，专注AI优先智能座舱', R:'以新兴电动科技品牌视角创作前沿座舱HMI界面', E:'参考Rivian R1T与Lucid Air座舱HMI设计语言', A:'深色主调流动渐变，AI功能中心化，OTA进度醒目', T:'展示智能生态互联与AI功能优先的界面信息架构', EX:'生成新势力科技风格座舱概念图，前沿科技感渲染' }},
+    { id:'b12', title:'摩托车仪表风格', tags:['Moto','Dashboard'], en:'Moto Dashboard',
+      raw:'摩托车数字仪表盘HMI设计，圆形速度表核心布局，极简驾驶信息，骑行模式切换，防风视角信息层级，运动感极强配色，宝马/杜卡迪仪表参考',
+      create:{ C:'摩托车HMI设计师，专注两轮驾驶信息极简化', R:'为高性能摩托车设计极简驾驶信息仪表盘HMI', E:'参考宝马M1000RR与杜卡迪Panigale V4数字仪表设计', A:'圆形速度表核心，信息极度精简，强对比运动配色', T:'展示骑行模式切换与防风视角优化的信息层级', EX:'输出摩托车仪表盘概念图，运动激进美学渲染' }},
+  ]},
+  { id:'color-palette', name:'色彩系统', icon:'🎨', desc:'专项色彩方案提示词，用于控制AI图像生成的色调', prompts:[
+    { id:'c1', title:'深夜蓝黑系', tags:['Dark Blue','Night'], en:'Midnight Dark',
+      raw:'深夜蓝黑色调HMI界面，#0A0E1A深色背景，冷白文字，#4D9EFF蓝色激活色，低饱和度辅助色，暗色模式驾驶友好配色',
+      create:{ C:'暗色模式配色专家，专注低照度驾驶视觉安全', R:'以深夜蓝黑为主题设计护眼驾驶HMI配色方案', E:'参考iOS深色模式与特斯拉夜间界面配色规范', A:'#0A0E1A深色底，#4D9EFF蓝色激活，低饱和度辅助', T:'展示该配色在导航、仪表、状态三类组件上的应用', EX:'生成深夜蓝黑配色系统界面图，护眼低亮感强' }},
+    { id:'c2', title:'星空深蓝紫', tags:['Cosmic','Purple'], en:'Cosmic Purple',
+      raw:'星空深紫蓝色调座舱界面，午夜黑底色，#7B61FF紫色主调，星光金高亮，渐变光晕效果，宇宙感色彩系统',
+      create:{ C:'宇宙主题配色设计师，专注星空视觉美学', R:'以星空深紫蓝为主题设计座舱HMI配色方案', E:'参考Spotify星空主题与OLED屏幕深色视觉规范', A:'午夜黑底，#7B61FF紫色主调，星光金点缀高亮', T:'展示该配色在界面各层级组件上的视觉表达', EX:'输出星空宇宙感配色界面图，渐变光晕效果精美' }},
+    { id:'c3', title:'极光绿霓虹', tags:['Aurora','Green'], en:'Aurora Green',
+      raw:'极光绿霓虹色调HMI界面，深黑背景，#00FF9F荧光绿激活色，青色渐变，类似极光光效的UI光晕，未来科技发光效果',
+      create:{ C:'霓虹光效配色专家，专注发光视觉与科技氛围', R:'以极光绿霓虹为主题设计科技感HMI配色方案', E:'参考极光自然色彩与赛博朋克发光界面设计', A:'深黑底，#00FF9F荧光绿核心，青色渐变向外扩散', T:'展示发光光晕效果在界面核心元素上的视觉应用', EX:'生成极光霓虹配色界面图，发光效果极具视觉冲击力' }},
+    { id:'c4', title:'高亮白极简', tags:['White','Pure'], en:'Pure White',
+      raw:'高亮白色极简HMI界面，纯白底色，浅灰分割线，黑色主文字，极少量品牌色点缀，最大化留白，日间模式清晰易读',
+      create:{ C:'极简主义配色设计师，专注纯净白色视觉语言', R:'以极简白色为主题设计日间驾驶HMI配色方案', E:'参考特斯拉白色主题与苹果CarPlay界面配色规范', A:'纯白底，浅灰分割，黑色正文，品牌色极少量点缀', T:'展示白色系在强日光下的可读性与视觉清晰度', EX:'输出纯净白色极简配色界面图，日光强度渲染效果' }},
+    { id:'c5', title:'暖金豪华系', tags:['Gold','Warm'], en:'Warm Gold',
+      raw:'暖金豪华色调座舱界面，深棕黑底色，#C9A84C金色主调，香槟色文字，皮革质感纹理，金属高光效果，豪华品牌专属',
+      create:{ C:'豪华品牌配色专家，专注金属质感与奢华感表达', R:'以暖金豪华为主题设计顶级品牌座舱HMI配色', E:'参考劳斯莱斯内饰配色与宾利Bentley金色系应用', A:'深棕黑底，#C9A84C金色主导，香槟色文字优雅', T:'展示金色配色在皮革纹理背景下的高奢视觉表达', EX:'生成暖金豪华配色界面图，皮革金属质感精密渲染' }},
+    { id:'c6', title:'中国红科技', tags:['Red','China'], en:'China Red Tech',
+      raw:'中国红科技风HMI界面，深黑背景，#E63946中国红激活色，金属银辅色，东方美学元素，科技与传统融合配色系统',
+      create:{ C:'东方科技美学配色设计师，专注中国红数字应用', R:'以中国红科技风为主题设计国潮HMI配色方案', E:'参考华为红色主题系统与国内豪华车国风配色案例', A:'深黑底，#E63946中国红核心激活，金属银辅助', T:'展示中国红在科技界面中的现代化东方美学应用', EX:'输出中国红科技配色界面图，东方美学与科技感并重' }},
+    { id:'c7', title:'冰川白银灰', tags:['Ice','Silver'], en:'Ice Silver',
+      raw:'冰川银白色调智能座舱界面，纯净白底，冷金属银色UI组件，冰蓝色高亮，极简北欧风格配色，清晨日光感界面',
+      create:{ C:'冷色调配色专家，专注金属冰感视觉语言设计', R:'以冰川银白为主题设计北欧极简HMI配色方案', E:'参考沃尔沃冰蓝配色与苹果银色系产品视觉规范', A:'纯净白底，冷金属银组件，冰蓝色高亮激活', T:'展示冰感配色在清晨日光场景下的视觉清爽感', EX:'生成冰川银白配色界面图，清爽冰感日光渲染效果' }},
+    { id:'c8', title:'火焰橙活力', tags:['Orange','Energy'], en:'Energy Orange',
+      raw:'火焰橙活力色调运动HMI界面，深灰黑底，#FF6B35活力橙主调，红橙渐变，运动激情氛围，性能车激活态配色',
+      create:{ C:'运动性能配色设计师，专注活力视觉与激情氛围', R:'以火焰橙活力为主题设计运动性能HMI配色方案', E:'参考兰博基尼橙色内饰与运动品牌活力配色规范', A:'深灰黑底，#FF6B35活力橙，红橙渐变向外扩张', T:'展示活力橙配色在运动驾驶模式激活态的应用', EX:'输出火焰橙活力配色界面图，运动激情氛围渲染强烈' }},
+    { id:'c9', title:'森林沉绿系', tags:['Forest','Green'], en:'Forest Green',
+      raw:'森林沉绿色调座舱界面，#1B3A2D深绿底色，#4CAF7D绿色激活色，米白辅色文字，自然生态感配色，环保品牌专属色彩系统',
+      create:{ C:'生态设计师，专注自然色彩在数字界面的应用', R:'以森林沉绿为主题设计生态品牌HMI配色方案', E:'参考沃尔沃绿色可持续设计与自然色彩体系规范', A:'#1B3A2D深绿底，#4CAF7D绿色激活，米白辅助', T:'展示森林绿配色在环保电动车界面中的自然感表达', EX:'生成森林沉绿配色界面图，自然生态感视觉效果' }},
+    { id:'c10', title:'樱花粉柔系', tags:['Sakura','Soft'], en:'Sakura Soft',
+      raw:'樱花粉柔和色调HMI界面，象牙白底色，#FFB7C5樱花粉主调，金色高光点缀，温柔优雅氛围，女性向高端车型配色方案',
+      create:{ C:'女性向配色设计师，专注温柔优雅视觉表达', R:'以樱花粉柔和为主题设计女性向高端HMI配色', E:'参考宝马Women驾驶座舱与日系品牌女性专属配色', A:'象牙白底，#FFB7C5樱花粉主调，金色点缀高光', T:'展示樱花粉配色在温柔高端车型界面中的应用', EX:'输出樱花粉柔和配色界面图，温柔优雅氛围渲染精致' }},
+    { id:'c11', title:'钛金属银白', tags:['Titanium','Metal'], en:'Titanium Silver',
+      raw:'钛金属银白色调HMI界面，#C0C5CC冷银底色，镜面金属质感，纯白高光，冷峻科技感，无色系极致简约，工业设计感配色',
+      create:{ C:'工业材质配色专家，专注金属质感数字化表达', R:'以钛金属银白为主题设计工业极简HMI配色方案', E:'参考苹果钛金属产品色彩与包豪斯工业配色原则', A:'#C0C5CC冷银主调，镜面质感，纯白高光极简', T:'展示钛金属感配色在精工工业风格界面的应用', EX:'生成钛金属银白配色界面图，冷峻工业感精密渲染' }},
+    { id:'c12', title:'量子蓝紫渐变', tags:['Quantum','Gradient'], en:'Quantum Gradient',
+      raw:'量子蓝紫渐变色调座舱界面，#0A0A2E深空底色，#6E40C9至#0099FF渐变主调，等离子体光效，量子计算美学，高能粒子视觉感，顶级科技品牌配色',
+      create:{ C:'量子美学配色设计师，专注前沿科技视觉探索', R:'以量子蓝紫渐变为主题设计顶级科技HMI配色方案', E:'参考IBM量子计算视觉系统与微软量子研究视觉语言', A:'#0A0A2E深空底，#6E40C9→#0099FF渐变，粒子光效', T:'展示量子渐变配色在科技概念界面的极致视觉应用', EX:'输出量子蓝紫渐变配色界面图，高能粒子视觉效果强烈' }},
+  ]},
+  { id:'render-quality', name:'渲染质量', icon:'✨', desc:'控制AI图像渲染精度和画质的技术提示词', prompts:[
+    { id:'r1', title:'超高清渲染', tags:['8K','Photorealistic'], en:'Ultra HD Render',
+      raw:'超高清照片级渲染，8K分辨率，ray tracing光线追踪，photorealistic材质细节，显示器像素级精度，印刷品质UI截图效果',
+      create:{ C:'3D渲染技术总监，专注照片级超写实材质渲染', R:'以超高清照片级标准渲染HMI界面效果图', E:'参考Unreal Engine照片级渲染与Octane材质光效', A:'Ray tracing全局光照，材质每个像素精确模拟', T:'输出8K分辨率可用于印刷与大屏展示的效果图', EX:'生成照片级超写实HMI界面渲染图，像素级精密品质' }},
+    { id:'r2', title:'概念设计稿风', tags:['Sketch','Concept'], en:'Design Sketch',
+      raw:'概念设计草图风格，线稿与色彩结合，设计标注说明，设计师手稿质感，白纸蓝线风格，专业UX设计文档效果',
+      create:{ C:'UX设计师，专注概念探索阶段的草图表达方式', R:'以设计草图风格呈现HMI界面概念方案', E:'参考Apple Human Interface Guidelines设计文档风格', A:'线稿为基础，手绘质感，标注说明清晰，探索感强', T:'展示设计思路与决策依据，适合团队共创讨论', EX:'输出设计草图风格概念图，蓝线白纸专业设计文档感' }},
+    { id:'r3', title:'Keynote演示风', tags:['Presentation','Clean'], en:'Keynote Style',
+      raw:'Apple Keynote演示风格渲染，纯净背景，产品级质感展示，完美光影，发布会级别呈现，设备实体展示效果',
+      create:{ C:'产品发布会视觉总监，专注Keynote级别展示设计', R:'以Apple发布会标准呈现HMI界面产品级效果图', E:'直接参考Apple WWDC与特斯拉产品发布会视觉风格', A:'纯净背景，完美光影，设备实体展示，产品感拉满', T:'生成适合投影大屏展示的发布会级别界面效果图', EX:'输出Keynote演示风格界面图，Apple发布会级别质感' }},
+    { id:'r4', title:'等距3D视图', tags:['Isometric','3D'], en:'Isometric 3D',
+      raw:'等距3D视角界面展示，车舱三维剖面，UI组件立体化呈现，科技感等轴测图，清晰空间关系，产品概念展示',
+      create:{ C:'等距3D图形设计师，专注产品空间关系可视化', R:'以等距3D视角展示HMI界面与座舱空间关系', E:'参考Google Material Design等距插画与产品等轴测图', A:'30°等轴测视角，座舱剖面与界面立体展开', T:'展示HMI系统在真实座舱空间中的位置与比例关系', EX:'生成等距3D座舱空间图，清晰展示各屏幕空间布局' }},
+    { id:'r5', title:'黑色影棚风', tags:['Studio','Dark BG'], en:'Dark Studio',
+      raw:'影棚深黑背景产品展示，车载屏幕发光效果，完美光圈光晕，屏幕亮度激活感，暗环境高对比展示，科技产品摄影风格',
+      create:{ C:'科技产品摄影师，专注暗环境屏幕光效摄影', R:'以影棚黑色背景呈现HMI界面屏幕发光效果', E:'参考苹果产品官网深色背景摄影与三星屏幕展示风格', A:'纯黑影棚背景，屏幕发光为唯一光源，光晕完美', T:'强调屏幕亮度与内容在暗环境下的视觉冲击力', EX:'输出影棚黑色背景界面图，屏幕发光效果精美' }},
+    { id:'r6', title:'透视爆炸图', tags:['Exploded','Technical'], en:'Exploded View',
+      raw:'技术透视爆炸图风格，座舱系统组件分解展示，层级关系清晰，技术文档美学，每层组件标注，工程图纸精度感',
+      create:{ C:'技术插图设计师，专注工程分解图与系统架构可视化', R:'以技术爆炸图风格展示HMI系统各层级组件关系', E:'参考苹果产品拆解图与汽车工程技术文档插图规范', A:'各组件层次分明分离展开，连接线与标注精准', T:'展示界面系统、硬件、软件层级的组件结构关系', EX:'生成技术爆炸图风格座舱系统分解图，工程精密感强' }},
+    { id:'r7', title:'动态模糊效果', tags:['Motion Blur','Dynamic'], en:'Motion Blur',
+      raw:'动态模糊运动感效果，速度感UI视觉，运动拖影效果，时间曝光风格，车辆行进状态，动感视觉感受渲染',
+      create:{ C:'动感视觉设计师，专注速度感与运动模糊美学', R:'以动态模糊效果强化HMI界面的运动感与速度感', E:'参考F1赛车摄影长曝光拖影效果与运动品牌视觉语言', A:'界面元素沿运动方向产生速度拖影，临场感强', T:'展示车辆高速行进状态下的界面动态视觉表达', EX:'输出动态模糊风格界面图，速度感与动感拖影效果' }},
+    { id:'r8', title:'夜间真实感', tags:['Night','Realistic'], en:'Night Realistic',
+      raw:'夜间真实环境渲染，座舱内光线分布，屏幕光源照射效果，真实材质反光，夜间驾驶员视角，电影质感光影',
+      create:{ C:'电影级光影渲染师，专注夜间室内光环境模拟', R:'以电影级光影还原夜间驾驶座舱的真实光效', E:'参考汽车广告电影级内饰光影拍摄与CG渲染标准', A:'屏幕光源照射内饰，真实材质反光，环境光精准模拟', T:'展示夜间驾驶员坐在车内看到的真实座舱光环境', EX:'生成电影质感夜间座舱光影渲染图，真实感极强' }},
+    { id:'r9', title:'UI流程分镜图', tags:['Storyboard','Flow'], en:'UI Storyboard',
+      raw:'HMI交互流程分镜图风格，多帧连续状态展示，交互箭头标注，状态切换说明，用户故事可视化，设计提案文档风格，清晰白底专业感',
+      create:{ C:'交互设计师，专注用户旅程与交互流程视觉化', R:'以分镜图形式展示HMI关键交互流程与状态变化', E:'参考Google Ventures设计冲刺分镜法与UX流程图规范', A:'多帧画面连续排列，箭头指示状态流转，说明清晰', T:'展示某核心功能从触发到完成的完整交互流程分镜', EX:'输出清晰白底专业分镜图，适合设计提案与评审使用' }},
+    { id:'r10', title:'响应式多屏展示', tags:['Responsive','Multi-screen'], en:'Multi-screen',
+      raw:'多屏尺寸响应式展示渲染，仪表盘+中控+HUD三屏同框，内容协同展示，统一设计语言跨屏呈现，设备生态展示风格，产品线完整图',
+      create:{ C:'多屏幕系统设计师，专注跨屏内容协同体验', R:'以产品生态展示方式呈现HMI多屏协同界面系统', E:'参考苹果生态设备全家福展示与华为全场景多屏协同', A:'三屏同框排列，内容协同关系清晰，设计语言统一', T:'展示仪表盘、中控、HUD三屏在同一设计语言下的呈现', EX:'生成多屏协同生态展示图，产品线完整感视觉效果' }},
+    { id:'r11', title:'AR实景叠加效果', tags:['AR','Mixed Reality'], en:'AR Overlay',
+      raw:'AR增强现实实景叠加效果渲染，真实道路场景+数字UI叠加，半透明信息层，空间感交互元素，混合现实驾驶视角，未来HUD效果图',
+      create:{ C:'AR视觉效果设计师，专注混合现实界面合成', R:'以AR实景叠加方式呈现HMI信息在真实驾驶中的效果', E:'参考WayRay AR全息投影驾驶体验与微软HoloLens视觉', A:'真实道路拍摄，数字UI半透明叠加，空间感自然', T:'展示导航箭头、速度、预警信息在真实道路上的叠加', EX:'输出AR实景叠加效果合成图，真实与数字融合感强' }},
+    { id:'r12', title:'用户测试截图风', tags:['Usability','Testing'], en:'Usability Test',
+      raw:'用户可用性测试场景风格渲染，真实驾驶员操作视角，眼动热力图叠加，点击路径轨迹标注，任务完成率数据标注，研究报告专业呈现风格',
+      create:{ C:'用户研究员，专注可用性测试数据可视化呈现', R:'以研究报告风格展示HMI可用性测试的数据结论', E:'参考Nielsen Norman Group可用性报告与眼动研究图表', A:'界面截图上叠加眼动热力图与操作路径轨迹', T:'展示测试任务完成率、错误路径与改进建议数据', EX:'生成可用性测试报告风格界面图，专业研究文档美学' }},
+  ]},
+];
+
+
+
+// ── STATE ──
+let q = '', cat = 'all', favOnly = false;
+let favs = new Set(JSON.parse(localStorage.getItem('hmi_lib_favs')||'[]'));
+const cardModes = {};
+
+// ── INIT ──
+(function init(){
+  buildSidebar();
+  buildBuilder();
+  render();
+})();
+
+function buildSidebar(){
+  const total = CATS.reduce((s,c)=>s+c.prompts.length,0);
+  let h = `<div class="sb-group-label">全部内容</div>
+  <div class="sb-item ${cat==='all'?'active':''}" onclick="setCat('all')">
+    <span class="sb-icon">📋</span>全部提示词<span class="sb-count">${total}</span>
+  </div>`;
+  CATS.forEach(c=>{
+    h+=`<div class="sb-item ${cat===c.id?'active':''}" onclick="setCat('${c.id}')">
+      <span class="sb-icon">${c.icon}</span>${c.name}<span class="sb-count">${c.prompts.length}</span>
+    </div>`;
+  });
+  document.getElementById('sideNav').innerHTML=h;
+}
+
+function setCat(id){ cat=id; favOnly=false; document.getElementById('favNavBtn').classList.remove('active'); buildSidebar(); render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function onSearch(){ q=document.getElementById('searchInput').value.toLowerCase(); render(); }
+function toggleFavOnly(){ favOnly=!favOnly; document.getElementById('favNavBtn').classList.toggle('active',favOnly); if(favOnly)cat='all'; buildSidebar(); render(); }
+
+function buildBuilder(){
+  const ids=['visual-style','screen-type','function-module','color-palette','render-quality'];
+  document.getElementById('bSelects').innerHTML=ids.map(id=>{
+    const c=CATS.find(x=>x.id===id);
+    return `<div class="bfield"><label>${c.icon} ${c.name}</label>
+    <select class="bsel" onchange="buildCombined()">
+      <option value="">— 不选 —</option>
+      ${c.prompts.map(p=>`<option value="${p.id}">${p.title}</option>`).join('')}
+    </select></div>`;
+  }).join('');
+}
+
+function buildCombined(){
+  const ids=[...document.querySelectorAll('.bsel')].map(s=>s.value).filter(Boolean);
+  const out=document.getElementById('bOut');
+  if(ids.length<2){ out.textContent='请从上方选择至少两个维度…'; out.classList.remove('filled'); return; }
+  const all=CATS.flatMap(c=>c.prompts);
+  const parts=ids.map(id=>all.find(p=>p.id===id)?.raw).filter(Boolean);
+  out.textContent=parts.join('，')+'，超高清4K渲染，专业HMI概念设计图';
+  out.classList.add('filled');
+}
+
+function copyBuild(){ const t=document.getElementById('bOut').textContent; if(t.includes('请从'))return; navigator.clipboard.writeText(t).then(()=>toast('组合提示词已复制')); }
+function resetBuild(){ document.querySelectorAll('.bsel').forEach(s=>s.value=''); const o=document.getElementById('bOut'); o.textContent='请从上方选择至少两个维度…'; o.classList.remove('filled'); }
+
+function getFiltered(){
+  let cats=CATS;
+  if(cat!=='all') cats=cats.filter(c=>c.id===cat);
+  return cats.map(c=>({...c,prompts:c.prompts.filter(p=>{
+    if(favOnly&&!favs.has(p.id)) return false;
+    if(!q) return true;
+    return p.title.includes(q)||p.raw.includes(q)||p.tags.some(t=>t.toLowerCase().includes(q))||p.en.toLowerCase().includes(q);
+  })})).filter(c=>c.prompts.length>0);
+}
+
+function render(){
+  const data=getFiltered();
+  const total=data.reduce((s,c)=>s+c.prompts.length,0);
+  document.getElementById('visCount').textContent=total;
+  document.getElementById('favCnt').textContent=favs.size;
+  const hero=document.getElementById('heroArea');
+  if(hero) hero.style.display=(cat==='all'&&!q&&!favOnly)?'':' none';
+  const el=document.getElementById('sections');
+  if(!data.length){ el.innerHTML=`<div class="empty"><span class="empty-ico">🔍</span><p>没有找到匹配的提示词<br>换个关键词试试</p></div>`; return; }
+  el.innerHTML=data.map((c,ci)=>`
+    <div class="section">
+      <div class="section-hd">
+        <h2 class="section-title">${c.icon} ${c.name}</h2>
+        <span class="section-desc">${c.desc}</span>
+        <span class="section-badge">${c.prompts.length} 条</span>
+      </div>
+      <div class="pgrid">${c.prompts.map((p,pi)=>cardHtml(p,pi)).join('')}</div>
+    </div>`).join('');
+}
+
+function cardHtml(p,pi){
+  const fav=favs.has(p.id);
+  const mode=cardModes[p.id]||'raw';
+  const cr=p.create;
+  return `<div class="card" id="card-${p.id}" style="animation-delay:${(pi%16)*0.028}s">
+    <div class="card-top">
+      <div class="card-titles">
+        <div class="card-title">${p.title}</div>
+        <div class="card-en">${p.en}</div>
+      </div>
+      <button class="fav-btn ${fav?'on':''}" onclick="toggleFav('${p.id}',this)" title="${fav?'取消收藏':'添加收藏'}">
+        <svg fill="${fav?'currentColor':'none'}" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="card-tags">${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    <div class="mode-toggle">
+      <button class="mt-btn ${mode==='raw'?'active':''}" onclick="setMode('${p.id}','raw')">图像生成</button>
+      <button class="mt-btn ${mode==='create'?'active':''}" onclick="setMode('${p.id}','create')">CREATE 框架</button>
+    </div>
+    <div class="prompt-raw" id="raw-${p.id}" style="${mode!=='raw'?'display:none':''}">${p.raw}</div>
+    <div class="prompt-create ${mode==='create'?'show':''}" id="create-${p.id}">
+      <div class="cr-rows">
+        <div class="cr-row"><span class="cr-letter">C</span><span class="cr-key">角色</span><span class="cr-val">${cr.C}</span></div>
+        <div class="cr-row"><span class="cr-letter">R</span><span class="cr-key">请求</span><span class="cr-val">${cr.R}</span></div>
+        <div class="cr-row"><span class="cr-letter">E</span><span class="cr-key">示例</span><span class="cr-val">${cr.E}</span></div>
+        <div class="cr-row"><span class="cr-letter">A</span><span class="cr-key">行动</span><span class="cr-val">${cr.A}</span></div>
+        <div class="cr-row"><span class="cr-letter">T</span><span class="cr-key">任务</span><span class="cr-val">${cr.T}</span></div>
+        <div class="cr-row"><span class="cr-letter">E</span><span class="cr-key">执行</span><span class="cr-val">${cr.EX}</span></div>
+      </div>
+    </div>
+    <div class="card-actions">
+      <button class="copy-raw-btn" onclick="doCopy(this,'${p.id}','raw')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+        </svg>
+        复制原始版
+      </button>
+      <button class="copy-create-btn" onclick="doCopy(this,'${p.id}','create')">CREATE 版</button>
+      <span class="char-badge">${p.raw.length}字</span>
+    </div>
+  </div>`;
+}
+
+function setMode(id,mode){
+  cardModes[id]=mode;
+  const card=document.getElementById('card-'+id);
+  if(!card)return;
+  const rawEl=document.getElementById('raw-'+id);
+  const crEl=document.getElementById('create-'+id);
+  if(rawEl) rawEl.style.display=mode==='raw'?'':' none';
+  if(crEl) crEl.classList.toggle('show',mode==='create');
+  card.querySelectorAll('.mt-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&mode==='raw')||(i===1&&mode==='create')));
+}
+
+function doCopy(btn,id,type){
+  const p=CATS.flatMap(c=>c.prompts).find(x=>x.id===id);
+  if(!p)return;
+  let text=p.raw;
+  if(type==='create'){
+    const c=p.create;
+    text=`【角色 Character】${c.C}\n\n【请求 Request】${c.R}\n\n【示例 Examples】${c.E}\n\n【行动 Action】${c.A}\n\n【任务 Task】${c.T}\n\n【执行 Execution】${c.EX}`;
+  }
+  navigator.clipboard.writeText(text).then(()=>{
+    const prev=btn.innerHTML; btn.classList.add('done');
+    btn.textContent='已复制 ✓';
+    toast(type==='create'?'CREATE框架版已复制':'原始提示词已复制');
+    setTimeout(()=>{ btn.classList.remove('done'); btn.innerHTML=prev; },2200);
+  });
+}
+
+function toggleFav(id,btn){
+  if(favs.has(id)){ favs.delete(id); btn.classList.remove('on'); btn.querySelector('svg').setAttribute('fill','none'); }
+  else { favs.add(id); btn.classList.add('on'); btn.querySelector('svg').setAttribute('fill','currentColor'); }
+  localStorage.setItem('hmi_lib_favs',JSON.stringify([...favs]));
+  document.getElementById('favCnt').textContent=favs.size;
+  if(favOnly) render();
+}
+
+function toast(msg='已复制'){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2400);
+}
+</script>
+</body>
+</html>
